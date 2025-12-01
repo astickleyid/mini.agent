@@ -1,0 +1,187 @@
+name: Debug & Optimize
+
+on:
+  push:
+    branches: [ main, develop ]
+  pull_request:
+    branches: [ main, develop ]
+  workflow_dispatch:
+  schedule:
+    # Run weekly on Monday at 00:00 UTC
+    - cron: '0 0 * * 1'
+
+jobs:
+  analyze-performance:
+    name: Performance Analysis
+    runs-on: macos-13
+    
+    steps:
+    - name: Checkout code
+      uses: actions/checkout@v4
+      
+    - name: Select Xcode version
+      run: sudo xcode-select -s /Applications/Xcode_15.0.app/Contents/Developer
+      
+    - name: Build with optimization report
+      run: |
+        swift build -c release -Xswiftc -Rmodule-interface-rebuild \
+          -Xswiftc -Rpass-missed=inline \
+          -Xswiftc -Rpass=inline 2>&1 | tee optimization-report.txt
+        
+    - name: Analyze binary size
+      run: |
+        echo "=== Binary Size Analysis ==="
+        ls -lh .build/release/mini
+        size .build/release/mini || true
+        
+    - name: Upload optimization report
+      uses: actions/upload-artifact@v3
+      with:
+        name: optimization-report
+        path: optimization-report.txt
+        retention-days: 30
+        
+  memory-leaks:
+    name: Memory Leak Detection
+    runs-on: macos-13
+    
+    steps:
+    - name: Checkout code
+      uses: actions/checkout@v4
+      
+    - name: Select Xcode version
+      run: sudo xcode-select -s /Applications/Xcode_15.0.app/Contents/Developer
+      
+    - name: Build with sanitizers
+      run: |
+        echo "Building with Address Sanitizer..."
+        swift build -c debug \
+          -Xswiftc -sanitize=address \
+          -Xswiftc -sanitize=undefined || true
+        
+    - name: Check for memory issues
+      run: |
+        echo "Running basic memory checks..."
+        # Run CLI with basic commands (when agents are available)
+        .build/debug/mini --help || echo "⚠️ CLI not fully functional without agents"
+        .build/debug/mini --version
+        
+  code-complexity:
+    name: Code Complexity Analysis
+    runs-on: macos-13
+    
+    steps:
+    - name: Checkout code
+      uses: actions/checkout@v4
+      
+    - name: Install lizard
+      run: pip install lizard
+      
+    - name: Analyze complexity
+      run: |
+        echo "=== Code Complexity Analysis ==="
+        lizard . -l swift -w -o complexity-report.html || true
+        lizard . -l swift -w
+        
+    - name: Upload complexity report
+      uses: actions/upload-artifact@v3
+      if: always()
+      with:
+        name: complexity-report
+        path: complexity-report.html
+        retention-days: 30
+        
+  static-analysis:
+    name: Static Code Analysis
+    runs-on: macos-13
+    
+    steps:
+    - name: Checkout code
+      uses: actions/checkout@v4
+      
+    - name: Select Xcode version
+      run: sudo xcode-select -s /Applications/Xcode_15.0.app/Contents/Developer
+      
+    - name: Run static analyzer
+      run: |
+        echo "=== Static Analysis ==="
+        xcodebuild analyze \
+          -scheme mini \
+          -configuration Debug \
+          -enableAddressSanitizer YES \
+          CODE_SIGN_IDENTITY="" \
+          CODE_SIGNING_REQUIRED=NO || true
+        
+  dependency-audit:
+    name: Dependency Audit
+    runs-on: macos-13
+    
+    steps:
+    - name: Checkout code
+      uses: actions/checkout@v4
+      
+    - name: List dependencies
+      run: |
+        echo "=== Swift Package Dependencies ==="
+        swift package show-dependencies
+        
+    - name: Check for outdated dependencies
+      run: |
+        echo "=== Checking for updates ==="
+        swift package update --dry-run || true
+        
+  security-scan:
+    name: Security Scanning
+    runs-on: macos-13
+    
+    steps:
+    - name: Checkout code
+      uses: actions/checkout@v4
+      
+    - name: Scan for secrets
+      run: |
+        echo "=== Scanning for leaked secrets ==="
+        # Check for common patterns
+        echo "Checking for API keys..."
+        grep -r "api[_-]key" --include="*.swift" . || echo "No API keys found"
+        
+        echo "Checking for passwords..."
+        grep -r "password\s*=" --include="*.swift" . || echo "No hardcoded passwords found"
+        
+        echo "Checking for tokens..."
+        grep -r "token\s*=" --include="*.swift" . || echo "No hardcoded tokens found"
+        
+    - name: Check file permissions
+      run: |
+        echo "=== Checking file permissions ==="
+        find . -type f -perm -o+w -not -path "./.git/*" -not -path "./.build/*" || echo "No world-writable files"
+        
+  build-matrix:
+    name: Build Matrix Test
+    runs-on: macos-13
+    strategy:
+      matrix:
+        configuration: [debug, release]
+        
+    steps:
+    - name: Checkout code
+      uses: actions/checkout@v4
+      
+    - name: Select Xcode version
+      run: sudo xcode-select -s /Applications/Xcode_15.0.app/Contents/Developer
+      
+    - name: Build ${{ matrix.configuration }}
+      run: |
+        if [ "${{ matrix.configuration }}" == "debug" ]; then
+          swift build -v
+        else
+          swift build -c release -v
+        fi
+        
+    - name: Verify binary
+      run: |
+        if [ "${{ matrix.configuration }}" == "debug" ]; then
+          .build/debug/mini --version
+        else
+          .build/release/mini --version
+        fi

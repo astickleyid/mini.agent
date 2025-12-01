@@ -1,0 +1,9 @@
+name: tmp
+options:
+  deploymentTarget:
+    macOS: 13.0
+targets:
+  cli:
+    type: commandLineTool
+    platform: macOS
+    sources: []

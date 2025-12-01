@@ -1,0 +1,61 @@
+name: Release
+
+on:
+  push:
+    tags:
+      - 'v*.*.*'
+  workflow_dispatch:
+
+jobs:
+  build-release:
+    name: Build Release Binaries
+    runs-on: macos-13
+    
+    steps:
+    - name: Checkout code
+      uses: actions/checkout@v4
+      
+    - name: Select Xcode version
+      run: sudo xcode-select -s /Applications/Xcode_15.0.app/Contents/Developer
+      
+    - name: Build Release
+      run: swift build -c release -v
+      
+    - name: Package CLI
+      run: |
+        mkdir -p release
+        cp .build/release/mini release/
+        chmod +x release/mini
+        tar -czf mini-cli-macos.tar.gz -C release mini
+        
+    - name: Generate checksums
+      run: |
+        shasum -a 256 mini-cli-macos.tar.gz > checksums.txt
+        
+    - name: Create Release
+      uses: softprops/action-gh-release@v1
+      if: startsWith(github.ref, 'refs/tags/')
+      with:
+        files: |
+          mini-cli-macos.tar.gz
+          checksums.txt
+        body: |
+          ## mini.agent Release
+          
+          ### Installation
+          ```bash
+          # Download and extract
+          curl -L https://github.com/${{ github.repository }}/releases/download/${{ github.ref_name }}/mini-cli-macos.tar.gz | tar xz
+          
+          # Install
+          sudo mv mini /usr/local/bin/
+          
+          # Verify
+          mini --version
+          ```
+          
+          See [CHANGELOG.md](CHANGELOG.md) for details.
+        draft: false
+        prerelease: false
+      env:
+        GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}

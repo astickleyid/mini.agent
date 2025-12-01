@@ -1,0 +1,149 @@
+name: mini-agent
+options:
+  deploymentTarget:
+    macOS: 13.0
+packages: {}
+targets:
+  XPCShared:
+    type: framework
+    platform: macOS
+    sources:
+      - path: XPCShared
+    settings:
+      base:
+        PRODUCT_BUNDLE_IDENTIFIER: mini.agent.XPCShared
+
+  mini:
+    type: commandLineTool
+    platform: macOS
+    sources:
+      - path: CLI/mini
+    dependencies:
+      - target: XPCShared
+    settings:
+      base:
+        PRODUCT_BUNDLE_IDENTIFIER: mini.agent.cli
+
+  MiniDashboardApp:
+    type: application
+    platform: macOS
+    sources:
+      - path: macOSApp
+    dependencies:
+      - target: XPCShared
+    info:
+      path: macOSApp/Info.plist
+    settings:
+      base:
+        PRODUCT_BUNDLE_IDENTIFIER: mini.agent.dashboard
+
+  BuilderAgent:
+    type: xpcService
+    platform: macOS
+    sources:
+      - path: Agents/BuilderAgent/Sources/BuilderAgent
+    dependencies:
+      - target: XPCShared
+    info:
+      path: Agents/BuilderAgent/Info.plist
+    settings:
+      base:
+        PRODUCT_BUNDLE_IDENTIFIER: mini.agent.builder
+
+  DebuggerAgent:
+    type: xpcService
+    platform: macOS
+    sources:
+      - path: Agents/DebuggerAgent/Sources/DebuggerAgent
+    dependencies:
+      - target: XPCShared
+    info:
+      path: Agents/DebuggerAgent/Info.plist
+    settings:
+      base:
+        PRODUCT_BUNDLE_IDENTIFIER: mini.agent.debugger
+
+  MemoryAgent:
+    type: xpcService
+    platform: macOS
+    sources:
+      - path: Agents/MemoryAgent/Sources/MemoryAgent
+    dependencies:
+      - target: XPCShared
+    info:
+      path: Agents/MemoryAgent/Info.plist
+    settings:
+      base:
+        PRODUCT_BUNDLE_IDENTIFIER: mini.agent.memory
+
+  RepoAgent:
+    type: xpcService
+    platform: macOS
+    sources:
+      - path: Agents/RepoAgent/Sources/RepoAgent
+    dependencies:
+      - target: XPCShared
+    info:
+      path: Agents/RepoAgent/Info.plist
+    settings:
+      base:
+        PRODUCT_BUNDLE_IDENTIFIER: mini.agent.repo
+
+  TestAgent:
+    type: xpcService
+    platform: macOS
+    sources:
+      - path: Agents/TestAgent/Sources/TestAgent
+    dependencies:
+      - target: XPCShared
+    info:
+      path: Agents/TestAgent/Info.plist
+    settings:
+      base:
+        PRODUCT_BUNDLE_IDENTIFIER: mini.agent.test
+
+  TerminalProxyAgent:
+    type: xpcService
+    platform: macOS
+    sources:
+      - path: Agents/TerminalProxyAgent/Sources/TerminalProxyAgent
+    dependencies:
+      - target: XPCShared
+    info:
+      path: Agents/TerminalProxyAgent/Info.plist
+    settings:
+      base:
+        PRODUCT_BUNDLE_IDENTIFIER: mini.agent.terminalproxy
+
+  SupervisorAgent:
+    type: xpcService
+    platform: macOS
+    sources:
+      - path: Agents/SupervisorAgent/Sources/SupervisorAgent
+    dependencies:
+      - target: XPCShared
+    info:
+      path: Agents/SupervisorAgent/Info.plist
+    settings:
+      base:
+        PRODUCT_BUNDLE_IDENTIFIER: mini.agent.supervisor
+
+schemes:
+  mini:
+    build:
+      targets:
+        mini: all
+  MiniDashboardApp:
+    build:
+      targets:
+        MiniDashboardApp: all
+  Agents:
+    build:
+      targets:
+        BuilderAgent: all
+        DebuggerAgent: all
+        MemoryAgent: all
+        RepoAgent: all
+        TestAgent: all
+        TerminalProxyAgent: all
+        SupervisorAgent: all

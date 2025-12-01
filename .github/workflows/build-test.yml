@@ -1,0 +1,109 @@
+name: Build and Test
+
+on:
+  push:
+    branches: [ main, develop ]
+  pull_request:
+    branches: [ main, develop ]
+  workflow_dispatch:
+
+jobs:
+  build:
+    name: Build on macOS
+    runs-on: macos-13
+    
+    steps:
+    - name: Checkout code
+      uses: actions/checkout@v4
+      
+    - name: Select Xcode version
+      run: sudo xcode-select -s /Applications/Xcode_15.0.app/Contents/Developer
+      
+    - name: Show Swift version
+      run: swift --version
+      
+    - name: Cache Swift packages
+      uses: actions/cache@v3
+      with:
+        path: .build
+        key: ${{ runner.os }}-spm-${{ hashFiles('**/Package.resolved') }}
+        restore-keys: |
+          ${{ runner.os }}-spm-
+    
+    - name: Build Debug
+      run: swift build -v
+      
+    - name: Build Release
+      run: swift build -c release -v
+      
+    - name: Run CLI help
+      run: .build/release/mini --help
+      
+    - name: Run CLI version
+      run: .build/release/mini --version
+      
+    - name: Upload CLI artifact
+      uses: actions/upload-artifact@v3
+      with:
+        name: mini-cli
+        path: .build/release/mini
+        retention-days: 7
+        
+  lint:
+    name: Swift Lint
+    runs-on: macos-13
+    
+    steps:
+    - name: Checkout code
+      uses: actions/checkout@v4
+      
+    - name: Install SwiftLint
+      run: brew install swiftlint
+      
+    - name: Run SwiftLint
+      run: swiftlint --reporter github-actions-logging || true
+      continue-on-error: true
+      
+  analyze:
+    name: Code Analysis
+    runs-on: macos-13
+    
+    steps:
+    - name: Checkout code
+      uses: actions/checkout@v4
+      
+    - name: Select Xcode version
+      run: sudo xcode-select -s /Applications/Xcode_15.0.app/Contents/Developer
+      
+    - name: Analyze code
+      run: |
+        swift build --build-tests -Xswiftc -warnings-as-errors || true
+        
+    - name: Check for TODO/FIXME
+      run: |
+        echo "Checking for TODO and FIXME comments..."
+        grep -r "TODO\|FIXME" --include="*.swift" . || echo "No TODO/FIXME found"
+        
+  documentation:
+    name: Check Documentation
+    runs-on: macos-13
+    
+    steps:
+    - name: Checkout code
+      uses: actions/checkout@v4
+      
+    - name: Verify documentation files exist
+      run: |
+        test -f README.md || exit 1
+        test -f ANALYSIS.md || exit 1
+        test -f IMPLEMENTATION_SUMMARY.md || exit 1
+        test -f QUICKSTART.md || exit 1
+        test -f CHANGELOG.md || exit 1
+        echo "✅ All documentation files present"
+        
+    - name: Check markdown formatting
+      run: |
+        # Install markdown linter
+        npm install -g markdownlint-cli || true
+        markdownlint '*.md' --config .markdownlint.json || true
+      continue-on-error: true

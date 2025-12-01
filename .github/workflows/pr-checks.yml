@@ -1,0 +1,89 @@
+name: PR Checks
+
+on:
+  pull_request:
+    types: [opened, synchronize, reopened]
+
+jobs:
+  validation:
+    name: PR Validation
+    runs-on: macos-13
+    
+    steps:
+    - name: Checkout code
+      uses: actions/checkout@v4
+      with:
+        fetch-depth: 0
+      
+    - name: Check PR title
+      run: |
+        PR_TITLE="${{ github.event.pull_request.title }}"
+        echo "PR Title: $PR_TITLE"
+        
+        # Check for conventional commit format
+        if echo "$PR_TITLE" | grep -qE "^(feat|fix|docs|style|refactor|test|chore|perf|ci|build|revert)(\(.+\))?:"; then
+          echo "✅ PR title follows conventional commit format"
+        else
+          echo "⚠️ PR title should follow conventional commit format: type(scope): description"
+          echo "Examples: feat: add new feature, fix(cli): resolve timeout issue"
+        fi
+        
+    - name: Check for CHANGELOG update
+      run: |
+        if git diff origin/main...HEAD --name-only | grep -q "CHANGELOG.md"; then
+          echo "✅ CHANGELOG.md updated"
+        else
+          echo "⚠️ Consider updating CHANGELOG.md"
+        fi
+        
+    - name: Check file sizes
+      run: |
+        echo "=== Checking for large files ==="
+        find . -type f -size +1M -not -path "./.git/*" -not -path "./.build/*" || echo "No large files found"
+        
+    - name: Verify no debug code
+      run: |
+        echo "=== Checking for debug code ==="
+        grep -r "print(" --include="*.swift" . && echo "⚠️ Found print statements" || echo "✅ No print statements"
+        grep -r "debugPrint(" --include="*.swift" . && echo "⚠️ Found debugPrint statements" || echo "✅ No debugPrint"
+        
+  build-test:
+    name: Quick Build Test
+    runs-on: macos-13
+    
+    steps:
+    - name: Checkout code
+      uses: actions/checkout@v4
+      
+    - name: Select Xcode version
+      run: sudo xcode-select -s /Applications/Xcode_15.0.app/Contents/Developer
+      
+    - name: Quick build check
+      run: swift build
+      
+    - name: Verify CLI works
+      run: |
+        .build/debug/mini --version
+        .build/debug/mini --help
+        
+  code-review:
+    name: Automated Code Review
+    runs-on: macos-13
+    
+    steps:
+    - name: Checkout code
+      uses: actions/checkout@v4
+      with:
+        fetch-depth: 0
+      
+    - name: Count changed lines
+      run: |
+        echo "=== Lines Changed ==="
+        git diff origin/main...HEAD --stat
+        
+    - name: Check for breaking changes
+      run: |
+        echo "=== Checking for potential breaking changes ==="
+        git diff origin/main...HEAD -- XPCShared/ | grep -E "^-.*public|^-.*func|^-.*class|^-.*struct" && \
+          echo "⚠️ Potential breaking changes detected" || \
+          echo "✅ No obvious breaking changes"

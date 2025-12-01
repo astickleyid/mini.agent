@@ -1,0 +1,59 @@
+# SwiftLint Configuration for mini.agent
+
+disabled_rules:
+  - trailing_whitespace
+  - line_length
+  
+opt_in_rules:
+  - empty_count
+  - empty_string
+  - explicit_init
+  - fatal_error_message
+  - force_unwrapping
+  - implicit_return
+  - redundant_nil_coalescing
+  - unavailable_function
+
+included:
+  - CLI
+  - XPCShared
+  - Agents
+  - macOSApp
+
+excluded:
+  - .build
+  - .git
+  - .venv
+  - build
+  - Pods
+
+# Rule configurations
+identifier_name:
+  min_length: 2
+  max_length: 50
+  
+type_name:
+  min_length: 3
+  max_length: 50
+
+function_body_length:
+  warning: 60
+  error: 100
+
+file_length:
+  warning: 500
+  error: 1000
+
+cyclomatic_complexity:
+  warning: 10
+  error: 20
+
+nesting:
+  type_level:
+    warning: 2
+  
+force_cast: warning
+force_try: warning
+force_unwrapping: warning
+
+reporter: "xcode"
