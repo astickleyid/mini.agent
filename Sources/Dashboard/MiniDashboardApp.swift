@@ -1,5 +1,7 @@
 import SwiftUI
 import AppKit
+import MiniAgentCore
+import Agents
 
 @main
 struct MiniDashboardApp: App {
@@ -25,7 +27,7 @@ class AppDelegate: NSObject, NSApplicationDelegate {
 }
 
 struct DashboardView: View {
-    @EnvironmentObject var manager: AgentManager
+    @StateObject private var manager = AgentManager.shared
     @State private var output: String = "Welcome to Mini Agent Dashboard\n\nSelect an action to get started..."
     @State private var isProcessing = false
     @State private var commitMessage = ""
@@ -55,7 +57,11 @@ struct DashboardView: View {
     
     private var headerView: some View {
         HStack {
-            Text("🤖 Mini Agent Dashboard")
+            Image(systemName: "cpu.fill")
+                .font(.system(size: 20))
+                .foregroundColor(.accentColor)
+            
+            Text("Mini Agent Dashboard")
                 .font(.title2)
                 .fontWeight(.bold)
             

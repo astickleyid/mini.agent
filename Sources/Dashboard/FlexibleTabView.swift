@@ -1,4 +1,6 @@
 import SwiftUI
+import MiniAgentCore
+import Agents
 
 // Browser-style tab view with drag-to-reorder
 struct FlexibleTabView: View {
@@ -128,8 +130,10 @@ struct BrowserTab: View {
     
     var body: some View {
         HStack(spacing: 8) {
-            Text(tab.icon)
+            Image(systemName: tab.iconName)
                 .font(.system(size: 14))
+                .foregroundColor(isSelected ? .accentColor : .secondary)
+                .frame(width: 16)
             
             Text(tab.title)
                 .font(.system(size: 12))
@@ -149,7 +153,7 @@ struct BrowserTab: View {
         }
         .padding(.horizontal, 12)
         .padding(.vertical, 8)
-        .frame(width: tabWidth)
+        .frame(width: tabWidth, height: 36)
         .background(
             ZStack {
                 if isSelected {
@@ -259,6 +263,7 @@ struct TabShape: Shape {
 
 struct TabContentView: View {
     let type: TabType
+    @StateObject private var manager = AgentManager.shared
     
     var body: some View {
         Group {
@@ -273,6 +278,15 @@ struct TabContentView: View {
                 PreferencesConfigView()
             case .dashboard:
                 DashboardView()
+                    .task {
+                        Task { @MainActor in
+                            manager.registerAgent(BuilderAgent(), named: "builder")
+                            manager.registerAgent(TestAgent(), named: "test")
+                            manager.registerAgent(RepoAgent(), named: "repo")
+                            manager.registerAgent(MemoryAgent(), named: "memory")
+                            try? await manager.startAll()
+                        }
+                    }
             case .generate:
                 GenerateView()
             case .knowledge:
@@ -307,13 +321,13 @@ struct AddTabSheet: View {
     @Binding var selectedTab: TabItem?
     
     let availableTabs: [(TabType, String, String)] = [
-        (.dashboard, "Dashboard", "square.grid.2x2"),
-        (.aiTools, "AI Tools", "cpu"),
-        (.commands, "Commands", "terminal"),
-        (.projects, "Projects", "folder"),
+        (.dashboard, "Dashboard", "square.grid.2x2.fill"),
+        (.aiTools, "AI Tools", "cpu.fill"),
+        (.commands, "Commands", "terminal.fill"),
+        (.projects, "Projects", "folder.fill"),
         (.generate, "Generate Code", "wand.and.stars"),
-        (.knowledge, "Knowledge Base", "book"),
-        (.preferences, "Preferences", "gearshape")
+        (.knowledge, "Knowledge Base", "book.fill"),
+        (.preferences, "Preferences", "gearshape.fill")
     ]
     
     var body: some View {
@@ -423,15 +437,15 @@ struct TabItem: Identifiable, Hashable {
         }
     }
     
-    var icon: String {
+    var iconName: String {
         switch type {
-        case .dashboard: return "📊"
-        case .aiTools: return "🤖"
-        case .commands: return "⚡"
-        case .projects: return "📁"
-        case .generate: return "✨"
-        case .knowledge: return "📚"
-        case .preferences: return "⚙️"
+        case .dashboard: return "square.grid.2x2.fill"
+        case .aiTools: return "cpu.fill"
+        case .commands: return "terminal.fill"
+        case .projects: return "folder.fill"
+        case .generate: return "wand.and.stars"
+        case .knowledge: return "book.fill"
+        case .preferences: return "gearshape.fill"
         }
     }
 }

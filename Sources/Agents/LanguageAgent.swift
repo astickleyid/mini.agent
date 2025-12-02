@@ -144,7 +144,7 @@ public actor LanguageAgent: Agent {
         }
         
         let grouped = Dictionary(grouping: defs) { $0.category }
-        var output = "📚 YOUR LANGUAGE DEFINITIONS\n\n"
+        var output = "YOUR LANGUAGE DEFINITIONS\n\n"
         
         for (category, items) in grouped.sorted(by: { $0.key < $1.key }) {
             output += "[\(category.uppercased())]\n"

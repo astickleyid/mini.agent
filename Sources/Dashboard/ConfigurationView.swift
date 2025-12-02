@@ -7,14 +7,21 @@ struct ConfigurationView: View {
     var body: some View {
         VStack(spacing: 0) {
             // Header
-            HStack {
-                Text("⚙️ Configuration")
+            HStack(spacing: 12) {
+                Image(systemName: "gearshape.2.fill")
+                    .font(.title2)
+                    .foregroundColor(.accentColor)
+                
+                Text("Configuration")
                     .font(.title)
                     .fontWeight(.bold)
+                
                 Spacer()
             }
             .padding()
-            .background(Color.gray.opacity(0.1))
+            .background(Color(NSColor.windowBackgroundColor))
+            
+            Divider()
             
             // Tabs
             HStack(spacing: 0) {
@@ -31,7 +38,9 @@ struct ConfigurationView: View {
                     selectedTab = 3
                 }
             }
-            .background(Color.gray.opacity(0.15))
+            .background(Color(NSColor.controlBackgroundColor))
+            
+            Divider()
             
             // Content
             ScrollView {
@@ -49,9 +58,10 @@ struct ConfigurationView: View {
                         EmptyView()
                     }
                 }
-                .padding()
+                .padding(24)
                 .frame(maxWidth: .infinity, alignment: .leading)
             }
+            .background(Color(NSColor.windowBackgroundColor))
         }
     }
 }
@@ -62,160 +72,213 @@ struct AIToolsConfigView: View {
     @StateObject private var config = ConfigurationManager.shared
     
     var body: some View {
-        VStack(alignment: .leading, spacing: 20) {
+        VStack(alignment: .leading, spacing: 24) {
             Text("AI Tool Integration")
                 .font(.title2)
-                .fontWeight(.bold)
+                .fontWeight(.semibold)
             
-            // GitHub Copilot
-            AIToolCard(
-                name: "GitHub Copilot",
-                icon: "🤖",
-                enabled: $config.copilotEnabled,
-                command: $config.copilotCommand,
-                description: "Best for code generation"
-            )
-            
-            // Gemini
-            AIToolCard(
-                name: "Google Gemini",
-                icon: "✨",
-                enabled: $config.geminiEnabled,
-                command: $config.geminiCommand,
-                description: "Fast answers and explanations"
-            )
-            
-            // OpenAI
-            AIToolCard(
-                name: "OpenAI",
-                icon: "🧠",
-                enabled: $config.openaiEnabled,
-                command: $config.openaiCommand,
-                apiKey: $config.openaiApiKey,
-                description: "GPT-4 for complex reasoning"
-            )
-            
-            // Ollama (Local)
-            AIToolCard(
-                name: "Ollama",
-                icon: "🦙",
-                enabled: $config.ollamaEnabled,
-                command: $config.ollamaCommand,
-                description: "Local models, no API needed"
-            )
+            VStack(spacing: 16) {
+                // GitHub Copilot
+                AIToolCard(
+                    name: "GitHub Copilot",
+                    iconName: "terminal.fill",
+                    iconColor: .green,
+                    enabled: $config.copilotEnabled,
+                    command: $config.copilotCommand,
+                    description: "Best for code generation"
+                )
+                
+                // Gemini
+                AIToolCard(
+                    name: "Google Gemini",
+                    iconName: "sparkles",
+                    iconColor: .blue,
+                    enabled: $config.geminiEnabled,
+                    command: $config.geminiCommand,
+                    description: "Fast answers and explanations"
+                )
+                
+                // OpenAI
+                AIToolCard(
+                    name: "OpenAI",
+                    iconName: "cpu",
+                    iconColor: .purple,
+                    enabled: $config.openaiEnabled,
+                    command: $config.openaiCommand,
+                    apiKey: $config.openaiApiKey,
+                    description: "GPT-4 for complex reasoning"
+                )
+                
+                // Ollama (Local)
+                AIToolCard(
+                    name: "Ollama",
+                    iconName: "server.rack",
+                    iconColor: .orange,
+                    enabled: $config.ollamaEnabled,
+                    command: $config.ollamaCommand,
+                    description: "Local models, no API needed"
+                )
+            }
             
             Divider()
+                .padding(.vertical, 8)
             
             // Routing Preferences
-            VStack(alignment: .leading, spacing: 12) {
+            VStack(alignment: .leading, spacing: 16) {
                 Text("Smart Routing")
                     .font(.headline)
+                    .fontWeight(.semibold)
                 
-                HStack {
-                    Text("Default AI:")
-                    Picker("", selection: $config.defaultAI) {
-                        Text("Copilot").tag("copilot")
-                        Text("Gemini").tag("gemini")
-                        Text("OpenAI").tag("openai")
-                        Text("Ollama").tag("ollama")
+                VStack(alignment: .leading, spacing: 12) {
+                    HStack {
+                        Text("Default AI:")
+                            .frame(width: 140, alignment: .trailing)
+                        Picker("", selection: $config.defaultAI) {
+                            Text("Copilot").tag("copilot")
+                            Text("Gemini").tag("gemini")
+                            Text("OpenAI").tag("openai")
+                            Text("Ollama").tag("ollama")
+                        }
+                        .pickerStyle(.menu)
+                        .frame(width: 150)
+                        Spacer()
                     }
-                    .pickerStyle(.menu)
-                }
-                
-                HStack {
-                    Text("Code generation:")
-                    Picker("", selection: $config.codeGenerationAI) {
-                        Text("Copilot").tag("copilot")
-                        Text("OpenAI").tag("openai")
-                        Text("Ollama").tag("ollama")
+                    
+                    HStack {
+                        Text("Code generation:")
+                            .frame(width: 140, alignment: .trailing)
+                        Picker("", selection: $config.codeGenerationAI) {
+                            Text("Copilot").tag("copilot")
+                            Text("OpenAI").tag("openai")
+                            Text("Ollama").tag("ollama")
+                        }
+                        .pickerStyle(.menu)
+                        .frame(width: 150)
+                        Spacer()
                     }
-                    .pickerStyle(.menu)
-                }
-                
-                HStack {
-                    Text("Questions/Chat:")
-                    Picker("", selection: $config.questionsAI) {
-                        Text("Gemini").tag("gemini")
-                        Text("OpenAI").tag("openai")
-                        Text("Ollama").tag("ollama")
+                    
+                    HStack {
+                        Text("Questions/Chat:")
+                            .frame(width: 140, alignment: .trailing)
+                        Picker("", selection: $config.questionsAI) {
+                            Text("Gemini").tag("gemini")
+                            Text("OpenAI").tag("openai")
+                            Text("Ollama").tag("ollama")
+                        }
+                        .pickerStyle(.menu)
+                        .frame(width: 150)
+                        Spacer()
                     }
-                    .pickerStyle(.menu)
                 }
             }
-            .padding()
-            .background(Color.blue.opacity(0.1))
+            .padding(16)
+            .background(Color(NSColor.controlBackgroundColor))
             .cornerRadius(8)
             
             Button("Test All Connections") {
                 config.testAllConnections()
             }
             .buttonStyle(.borderedProminent)
+            
+            Spacer()
         }
     }
 }
 
 struct AIToolCard: View {
     let name: String
-    let icon: String
+    let iconName: String
+    let iconColor: Color
     @Binding var enabled: Bool
     @Binding var command: String
     var apiKey: Binding<String>? = nil
     let description: String
     
     @State private var isExpanded = false
+    @State private var isHovered = false
     
     var body: some View {
-        VStack(alignment: .leading, spacing: 12) {
-            HStack {
-                Text(icon)
-                    .font(.largeTitle)
+        VStack(spacing: 0) {
+            HStack(spacing: 16) {
+                // Icon
+                Image(systemName: iconName)
+                    .font(.system(size: 24))
+                    .foregroundColor(iconColor)
+                    .frame(width: 40)
+                    .accessibilityLabel("\(name) icon")
                 
-                VStack(alignment: .leading) {
+                // Name and Description
+                VStack(alignment: .leading, spacing: 4) {
                     Text(name)
                         .font(.headline)
                     Text(description)
                         .font(.caption)
                         .foregroundColor(.secondary)
+                        .lineLimit(2)
                 }
                 
                 Spacer()
                 
+                // Toggle
                 Toggle("", isOn: $enabled)
+                    .labelsHidden()
+                    .accessibilityLabel("Enable \(name)")
                 
-                Button(action: { isExpanded.toggle() }) {
-                    Image(systemName: isExpanded ? "chevron.up" : "chevron.down")
+                // Expand button
+                Button(action: { withAnimation(.easeInOut(duration: 0.2)) { isExpanded.toggle() } }) {
+                    Image(systemName: isExpanded ? "chevron.up.circle.fill" : "chevron.down.circle")
+                        .foregroundColor(.secondary)
+                        .imageScale(.large)
                 }
+                .buttonStyle(.plain)
+                .accessibilityLabel(isExpanded ? "Collapse" : "Expand")
             }
+            .padding(16)
             
             if isExpanded {
-                VStack(alignment: .leading, spacing: 8) {
-                    HStack {
+                Divider()
+                
+                VStack(alignment: .leading, spacing: 12) {
+                    HStack(spacing: 8) {
                         Text("CLI Command:")
-                            .font(.caption)
+                            .font(.subheadline)
+                            .foregroundColor(.secondary)
+                            .frame(width: 100, alignment: .trailing)
                         TextField("e.g., gh copilot", text: $command)
                             .textFieldStyle(.roundedBorder)
                     }
                     
                     if let apiKeyBinding = apiKey {
-                        HStack {
+                        HStack(spacing: 8) {
                             Text("API Key:")
-                                .font(.caption)
+                                .font(.subheadline)
+                                .foregroundColor(.secondary)
+                                .frame(width: 100, alignment: .trailing)
                             SecureField("Optional", text: apiKeyBinding)
                                 .textFieldStyle(.roundedBorder)
                         }
                     }
                     
-                    Button("Test Connection") {
-                        // Test this specific tool
+                    HStack {
+                        Spacer()
+                        Button("Test Connection") {
+                            // Test this specific tool
+                        }
+                        .buttonStyle(.bordered)
                     }
-                    .font(.caption)
                 }
-                .padding(.leading)
+                .padding(16)
+                .background(Color(NSColor.windowBackgroundColor))
             }
         }
-        .padding()
-        .background(Color.gray.opacity(0.05))
+        .background(Color(NSColor.controlBackgroundColor))
         .cornerRadius(8)
+        .shadow(color: Color.black.opacity(isHovered ? 0.1 : 0.05), radius: 4, x: 0, y: 2)
+        .onHover { hovering in
+            withAnimation(.easeInOut(duration: 0.15)) {
+                isHovered = hovering
+            }
+        }
     }
 }
 
@@ -226,11 +289,11 @@ struct CommandsConfigView: View {
     @State private var showAddCommand = false
     
     var body: some View {
-        VStack(alignment: .leading, spacing: 20) {
+        VStack(alignment: .leading, spacing: 24) {
             HStack {
                 Text("Custom Commands")
                     .font(.title2)
-                    .fontWeight(.bold)
+                    .fontWeight(.semibold)
                 
                 Spacer()
                 
@@ -241,20 +304,31 @@ struct CommandsConfigView: View {
             }
             
             if config.customCommands.isEmpty {
-                VStack(spacing: 12) {
+                VStack(spacing: 16) {
+                    Image(systemName: "terminal.fill")
+                        .font(.system(size: 48))
+                        .foregroundColor(.secondary)
+                    
                     Text("No custom commands yet")
+                        .font(.headline)
                         .foregroundColor(.secondary)
+                    
                     Text("Create shortcuts for your common workflows")
-                        .font(.caption)
+                        .font(.subheadline)
                         .foregroundColor(.secondary)
+                        .multilineTextAlignment(.center)
                 }
                 .frame(maxWidth: .infinity)
-                .padding(40)
+                .padding(60)
             } else {
-                ForEach(config.customCommands) { command in
-                    CustomCommandCard(command: command)
+                VStack(spacing: 16) {
+                    ForEach(config.customCommands) { command in
+                        CustomCommandCard(command: command)
+                    }
                 }
             }
+            
+            Spacer()
         }
         .sheet(isPresented: $showAddCommand) {
             AddCommandView()
@@ -265,61 +339,96 @@ struct CommandsConfigView: View {
 struct CustomCommandCard: View {
     let command: CustomCommand
     @State private var isExpanded = false
+    @State private var isHovered = false
     
     var body: some View {
-        VStack(alignment: .leading, spacing: 12) {
-            HStack {
-                Text(command.icon)
-                    .font(.title2)
+        VStack(spacing: 0) {
+            HStack(spacing: 16) {
+                // Icon
+                Image(systemName: "bolt.circle.fill")
+                    .font(.system(size: 24))
+                    .foregroundColor(.orange)
+                    .frame(width: 40)
                 
-                VStack(alignment: .leading) {
+                // Name and Description
+                VStack(alignment: .leading, spacing: 4) {
                     Text(command.name)
                         .font(.headline)
                     Text(command.description)
                         .font(.caption)
                         .foregroundColor(.secondary)
+                        .lineLimit(2)
                 }
                 
                 Spacer()
                 
-                Button(action: { isExpanded.toggle() }) {
-                    Image(systemName: isExpanded ? "chevron.up" : "chevron.down")
+                Button(action: { withAnimation(.easeInOut(duration: 0.2)) { isExpanded.toggle() } }) {
+                    Image(systemName: isExpanded ? "chevron.up.circle.fill" : "chevron.down.circle")
+                        .foregroundColor(.secondary)
+                        .imageScale(.large)
                 }
+                .buttonStyle(.plain)
             }
+            .padding(16)
             
             if isExpanded {
-                VStack(alignment: .leading, spacing: 8) {
-                    Text("Command: mini \(command.shortcut)")
-                        .font(.system(.caption, design: .monospaced))
-                        .padding(8)
-                        .background(Color.black.opacity(0.05))
-                        .cornerRadius(4)
+                Divider()
+                
+                VStack(alignment: .leading, spacing: 12) {
+                    VStack(alignment: .leading, spacing: 8) {
+                        Text("Shortcut:")
+                            .font(.subheadline)
+                            .foregroundColor(.secondary)
+                        
+                        Text("mini \(command.shortcut)")
+                            .font(.system(.body, design: .monospaced))
+                            .padding(8)
+                            .frame(maxWidth: .infinity, alignment: .leading)
+                            .background(Color(NSColor.textBackgroundColor))
+                            .cornerRadius(4)
+                    }
                     
-                    Text("What it does:")
-                        .font(.caption)
-                        .fontWeight(.semibold)
-                    Text(command.action)
-                        .font(.caption)
+                    VStack(alignment: .leading, spacing: 8) {
+                        Text("Action:")
+                            .font(.subheadline)
+                            .foregroundColor(.secondary)
+                        
+                        Text(command.action)
+                            .font(.caption)
+                            .foregroundColor(.primary)
+                    }
                     
-                    HStack {
+                    HStack(spacing: 12) {
                         Button("Run") {
                             // Execute command
                         }
+                        .buttonStyle(.bordered)
+                        
                         Button("Edit") {
                             // Edit command
                         }
+                        .buttonStyle(.bordered)
+                        
+                        Spacer()
+                        
                         Button("Delete", role: .destructive) {
                             // Delete command
                         }
+                        .buttonStyle(.bordered)
                     }
-                    .font(.caption)
                 }
-                .padding(.leading)
+                .padding(16)
+                .background(Color(NSColor.windowBackgroundColor))
             }
         }
-        .padding()
-        .background(Color.gray.opacity(0.05))
+        .background(Color(NSColor.controlBackgroundColor))
         .cornerRadius(8)
+        .shadow(color: Color.black.opacity(isHovered ? 0.1 : 0.05), radius: 4, x: 0, y: 2)
+        .onHover { hovering in
+            withAnimation(.easeInOut(duration: 0.15)) {
+                isHovered = hovering
+            }
+        }
     }
 }
 
@@ -329,7 +438,6 @@ struct AddCommandView: View {
     @State private var shortcut = ""
     @State private var description = ""
     @State private var action = ""
-    @State private var icon = "⚡"
     
     var body: some View {
         NavigationView {
@@ -338,12 +446,11 @@ struct AddCommandView: View {
                     TextField("Command Name", text: $name)
                     TextField("Shortcut (e.g., 'auth')", text: $shortcut)
                     TextField("Description", text: $description)
-                    TextField("Icon", text: $icon)
                 }
                 
                 Section("Action") {
                     TextEditor(text: $action)
-                        .frame(minHeight: 100)
+                        .frame(minHeight: 120)
                         .font(.system(.body, design: .monospaced))
                     
                     Text("What this command should do in plain English")
@@ -351,6 +458,7 @@ struct AddCommandView: View {
                         .foregroundColor(.secondary)
                 }
             }
+            .formStyle(.grouped)
             .navigationTitle("Add Custom Command")
             .toolbar {
                 ToolbarItem(placement: .cancellationAction) {
@@ -365,6 +473,7 @@ struct AddCommandView: View {
                 }
             }
         }
+        .frame(width: 500, height: 450)
     }
 }
 
@@ -378,11 +487,14 @@ struct TabButton: View {
     var body: some View {
         Button(action: action) {
             Text(title)
-                .font(.headline)
-                .foregroundColor(isSelected ? .primary : .secondary)
+                .font(.system(size: 13, weight: .medium))
+                .foregroundColor(isSelected ? .accentColor : .secondary)
                 .padding(.vertical, 12)
+                .padding(.horizontal, 16)
                 .frame(maxWidth: .infinity)
-                .background(isSelected ? Color.blue.opacity(0.1) : Color.clear)
+                .background(
+                    isSelected ? Color.accentColor.opacity(0.1) : Color.clear
+                )
         }
         .buttonStyle(.plain)
     }
@@ -390,13 +502,61 @@ struct TabButton: View {
 
 struct ProjectsConfigView: View {
     var body: some View {
-        Text("Projects Config - TODO")
+        VStack(alignment: .leading, spacing: 24) {
+            Text("Project Management")
+                .font(.title2)
+                .fontWeight(.semibold)
+            
+            VStack(spacing: 16) {
+                Image(systemName: "folder.fill")
+                    .font(.system(size: 48))
+                    .foregroundColor(.secondary)
+                
+                Text("Project management coming soon")
+                    .font(.headline)
+                    .foregroundColor(.secondary)
+                
+                Text("Manage your coding projects, track progress, and organize your workspace")
+                    .font(.subheadline)
+                    .foregroundColor(.secondary)
+                    .multilineTextAlignment(.center)
+                    .frame(maxWidth: 400)
+            }
+            .frame(maxWidth: .infinity)
+            .padding(60)
+            
+            Spacer()
+        }
     }
 }
 
 struct PreferencesConfigView: View {
     var body: some View {
-        Text("Preferences - TODO")
+        VStack(alignment: .leading, spacing: 24) {
+            Text("General Preferences")
+                .font(.title2)
+                .fontWeight(.semibold)
+            
+            VStack(spacing: 16) {
+                Image(systemName: "gearshape.2.fill")
+                    .font(.system(size: 48))
+                    .foregroundColor(.secondary)
+                
+                Text("Preferences coming soon")
+                    .font(.headline)
+                    .foregroundColor(.secondary)
+                
+                Text("Configure app settings, themes, keyboard shortcuts, and more")
+                    .font(.subheadline)
+                    .foregroundColor(.secondary)
+                    .multilineTextAlignment(.center)
+                    .frame(maxWidth: 400)
+            }
+            .frame(maxWidth: .infinity)
+            .padding(60)
+            
+            Spacer()
+        }
     }
 }
 
@@ -446,7 +606,6 @@ struct CustomCommand: Identifiable {
     let shortcut: String
     let description: String
     let action: String
-    let icon: String
 }
 
 #Preview {
