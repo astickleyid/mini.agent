@@ -2,81 +2,77 @@
 set -euo pipefail
 
 ROOT=$(cd "$(dirname "$0")" && pwd)
-BIN_DIR="$HOME/.mini/agents"
-LAUNCH_DIR="$HOME/Library/LaunchAgents"
 LOG_DIR="$HOME/.mini/logs"
 MEMORY_DIR="$HOME/.mini/memory"
 PROJECTS_DIR="$HOME/.mini/projects"
+CONFIG_DIR="$HOME/.mini"
 
-echo "🚀 Installing mini.agent..."
+echo "🚀 Installing mini.agent (Simplified Architecture)..."
+echo ""
 
 # Create necessary directories
-mkdir -p "$BIN_DIR" "$LAUNCH_DIR" "$LOG_DIR" "$MEMORY_DIR" "$PROJECTS_DIR"
-
-# Generate plist files with correct paths
-echo "📝 Generating LaunchAgent plists..."
-"$ROOT/generate_plists.sh"
+echo "📁 Creating directories..."
+mkdir -p "$LOG_DIR" "$MEMORY_DIR" "$PROJECTS_DIR" "$CONFIG_DIR"
 
 # Build CLI
+echo ""
 echo "🔨 Building CLI..."
 pushd "$ROOT" >/dev/null
 swift build -c release --product mini
-sudo cp .build/release/mini /usr/local/bin/mini
 popd >/dev/null
 
-echo "✅ CLI installed to /usr/local/bin/mini"
-
-# Initialize default configuration
-echo "⚙️  Creating default configuration..."
-mini init "$HOME/.mini/projects/current" 2>/dev/null || true
-
+# Install CLI
 echo ""
-echo "📦 Building XPC agents (this may take a few minutes)..."
-echo "You can build agents using one of these methods:"
-echo ""
-echo "Option 1 - Swift Package Manager (recommended):"
-echo "  swift build -c release"
-echo ""
-echo "Option 2 - Xcode (for GUI development):"
-echo "  xcodebuild -scheme Agents -configuration Release"
-echo ""
-echo "After building, run this script again to install the agents."
-echo ""
-
-# Check if agents are already built
-AGENTS_BUILT=true
-for agent in BuilderAgent DebuggerAgent MemoryAgent RepoAgent TestAgent TerminalProxyAgent SupervisorAgent; do
-    if [ ! -f ".build/release/$agent" ]; then
-        AGENTS_BUILT=false
-        break
-    fi
-done
-
-if [ "$AGENTS_BUILT" = true ]; then
-    echo "✅ Agents found in .build/release, copying to $BIN_DIR..."
-    for agent in BuilderAgent DebuggerAgent MemoryAgent RepoAgent TestAgent TerminalProxyAgent SupervisorAgent; do
-        mkdir -p "$BIN_DIR/$agent"
-        cp ".build/release/$agent" "$BIN_DIR/$agent/$agent"
-        echo "  ✓ Installed $agent"
-    done
-    
-    echo ""
-    echo "📋 Installing LaunchAgents..."
-    cp "$ROOT"/LaunchAgents/mini.agent.*.plist "$LAUNCH_DIR"/
-    
-    echo "🔄 Reloading LaunchAgents..."
-    launchctl unload "$LAUNCH_DIR"/mini.agent.*.plist 2>/dev/null || true
-    launchctl load "$LAUNCH_DIR"/mini.agent.*.plist
-    
-    echo ""
-    echo "✅ Installation complete!"
-    echo ""
-    echo "Available commands:"
-    echo "  mini status      - Check system status"
-    echo "  mini --help      - Show all commands"
-    echo ""
-    echo "Wait a few seconds for agents to start, then run: mini status"
+echo "📦 Installing CLI to /usr/local/bin/mini..."
+if [ -w "/usr/local/bin" ]; then
+    cp .build/release/mini /usr/local/bin/mini
 else
-    echo "⚠️  Agents not built yet. Build them first with: swift build -c release"
-    echo "Then run this install script again."
+    echo "   (requires sudo permission)"
+    sudo cp .build/release/mini /usr/local/bin/mini
 fi
+chmod +x /usr/local/bin/mini
+
+# Create default configuration
+echo ""
+echo "⚙️  Creating default configuration..."
+cat > "$CONFIG_DIR/config.json" <<EOF
+{
+  "projectPath": "$HOME/.mini/projects/current",
+  "logsPath": "$HOME/.mini/logs",
+  "memoryPath": "$HOME/.mini/memory"
+}
+EOF
+
+echo ""
+echo "✅ Installation complete!"
+echo ""
+echo "━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━"
+echo "  mini.agent - Simplified Architecture"
+echo "━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━"
+echo ""
+echo "Key improvements:"
+echo "  ✓ No XPC services - direct async/await agent calls"
+echo "  ✓ No launchd complexity - runs in-process"
+echo "  ✓ Standard SwiftPM build system"
+echo "  ✓ Single executable for CLI"
+echo ""
+echo "Available commands:"
+echo "  mini build              - Build your project"
+echo "  mini test               - Run tests"
+echo "  mini commit \"msg\"       - Git commit"
+echo "  mini branch \"name\"      - Create branch"
+echo "  mini status             - Git status"
+echo "  mini memory \"note\"      - Save note"
+echo "  mini config             - Show configuration"
+echo "  mini --help             - Show help"
+echo ""
+echo "Next steps:"
+echo "  1. Initialize your project:"
+echo "     mini init /path/to/your/project"
+echo ""
+echo "  2. Or create a symlink manually:"
+echo "     ln -s /path/to/your/project $HOME/.mini/projects/current"
+echo ""
+echo "  3. Try it out:"
+echo "     mini status"
+echo ""

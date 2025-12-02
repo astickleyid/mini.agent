@@ -1,13 +1,22 @@
 # mini.agent
 
-Local macOS multi-agent environment using XPC services, CLI, and a SwiftUI dashboard.
+**Simplified** local macOS multi-agent system using Swift Concurrency (async/await actors).
+
+## Architecture
+
+**v2.0 - Simplified Design:**
+- ✅ No XPC services - direct async/await agent calls
+- ✅ No launchd complexity - runs in-process
+- ✅ Standard SwiftPM build system
+- ✅ Single executable for CLI
+- ✅ Optional SwiftUI dashboard
 
 ## Structure
-- `XPCShared/`: Shared protocol + logger + JSON coders + configuration system
-- `Agents/`: Builder, Debugger, Memory, Repo, Test, TerminalProxy, Supervisor XPC services
-- `CLI/mini`: Command-line client (`mini`)
-- `macOSApp/`: SwiftUI dashboard
-- `LaunchAgents/`: `launchd` plists for each agent
+- `Sources/MiniAgentCore/`: Core agent framework (Agent protocol, AgentManager, Configuration, Logger)
+- `Sources/Agents/`: BuilderAgent, TestAgent, RepoAgent, MemoryAgent
+- `Sources/CLI/`: Command-line client (`mini`)
+- `Sources/Dashboard/`: SwiftUI dashboard (optional)
+- `Package.swift`: Swift Package Manager manifest
 - `install.sh`: Automated build/install script
 
 ## Installation
@@ -29,54 +38,66 @@ mini build                  # Build the current project
 mini test                   # Run tests
 mini commit "message"       # Create a git commit
 mini branch "name"          # Create a new git branch
-mini shell "command"        # Execute a shell command
+mini status                 # Show git status
 mini memory "note"          # Save a memory note
-mini status                 # Check system status
-mini logs [agent]           # View agent logs
-mini init [path]            # Initialize project
+mini init [path]            # Initialize project (default: current dir)
 mini config                 # Show configuration
-mini restart <agent>        # Restart an agent
 mini --version, -v          # Show version
 mini --help, -h             # Show this help
 ```
 
 ## Directory Structure
-- CLI install: `/usr/local/bin/mini`
-- Agents runtime: `~/.mini/agents/<AgentName>`
-- Logs: `~/.mini/logs/<agent>/`
-- Memory data: `~/.mini/memory/`
+- CLI executable: `/usr/local/bin/mini`
+- Logs: `~/.mini/logs/` (per-agent log files)
+- Memory data: `~/.mini/memory/` (saved notes)
 - Configuration: `~/.mini/config.json`
-- Projects: `~/.mini/projects/current` (symlink)
+- Projects: `~/.mini/projects/current` (symlink to your project)
 
 ## Features
 
-### Dynamic Configuration
-All paths are now dynamically resolved using the user's home directory. No hardcoded paths!
+### Simplified Architecture
+- **In-process agents**: Agents run directly within the CLI process using Swift actors
+- **No IPC overhead**: Direct async/await calls, no XPC serialization
+- **Instant startup**: No launchd services to manage
+- **Easy debugging**: Standard Swift debugging, no multi-process complexity
 
-### Enhanced Error Handling
-- Connection timeouts (30s default)
-- Descriptive error messages
-- Graceful degradation
+### Core Capabilities
+- **Build automation**: Swift package builds via BuilderAgent
+- **Test execution**: Automated testing via TestAgent
+- **Git operations**: Commit, branch, status via RepoAgent
+- **Memory system**: Persistent note-taking via MemoryAgent
+- **Configuration**: Dynamic path resolution using user's home directory
 
-### Agent Management
-- Health monitoring via SupervisorAgent
-- Automatic restart on failure
-- Individual agent restart capability
-
-## Smoke Tests
-1. `mini status` - Check all agents are running
-2. `mini config` - View configuration
-3. `mini logs supervisor` - View supervisor logs
-4. `mini build` - Build project
-5. `mini test` - Run tests
-6. `mini commit "initial"` - Create commit
-7. `mini branch "dev"` - Create branch
-8. `mini memory "first note"` - Save memory
+## Quick Test
+1. `mini config` - View configuration
+2. `mini status` - Check git status
+3. `mini build` - Build project (if Swift package)
+4. `mini test` - Run tests
+5. `mini commit "initial"` - Create commit
+6. `mini branch "dev"` - Create branch
+7. `mini memory "first note"` - Save memory note
 
 ## Build Details
-- **XPC services + dashboard**: via Xcode targets (mach services `mini.agent.<name>`)
-- **CLI**: via `swift build -c release`
-- **Install**: via `./install.sh` (copies binaries, generates & loads plists)
+- **CLI + Agents**: Standard SwiftPM via `swift build -c release`
+- **Dashboard** (optional): Build via Xcode for GUI development
+- **Install**: Run `./install.sh` to build and install the CLI
+
+## Why Simplified?
+
+The previous architecture used XPC services and launchd for agent isolation, which added:
+- Complex IPC serialization overhead
+- Multi-process debugging challenges
+- LaunchAgent plist management
+- Service lifecycle complexity
+
+The new architecture leverages Swift's modern concurrency model:
+- **Actors** provide thread-safe agent isolation
+- **Async/await** eliminates callback complexity
+- **In-process** execution is faster and simpler
+- **Standard tooling** for building and debugging
+
+Perfect for local development workflows where isolation isn't critical and simplicity matters more.
 
 ## Documentation
-See [ANALYSIS.md](ANALYSIS.md) for comprehensive codebase analysis and architecture details.
+- See [ANALYSIS.md](ANALYSIS.md) for legacy XPC architecture analysis
+- See `_old_xpc_architecture/` for previous implementation reference

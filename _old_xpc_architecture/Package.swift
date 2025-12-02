@@ -7,43 +7,41 @@ let package = Package(
         .macOS(.v13)
     ],
     products: [
-        .executable(name: "mini", targets: ["CLI"]),
-        .executable(name: "MiniDashboard", targets: ["Dashboard"]),
-        .library(name: "MiniAgentCore", targets: ["MiniAgentCore"]),
-        .library(name: "Agents", targets: ["Agents"])
+        .library(
+            name: "MiniAgentCore",
+            targets: ["MiniAgentCore"]
+        ),
+        .library(
+            name: "Agents",
+            targets: ["Agents"]
+        ),
+        .executable(
+            name: "mini",
+            targets: ["CLI"]
+        ),
+        .executable(
+            name: "MiniDashboard",
+            targets: ["Dashboard"]
+        )
     ],
     targets: [
-        // Core framework
         .target(
             name: "MiniAgentCore",
-            dependencies: [],
             path: "Sources/MiniAgentCore"
         ),
-        
-        // Agents
         .target(
             name: "Agents",
             dependencies: ["MiniAgentCore"],
             path: "Sources/Agents"
         ),
-        
-        // CLI tool
         .executableTarget(
             name: "CLI",
-            dependencies: [
-                "MiniAgentCore",
-                "Agents"
-            ],
+            dependencies: ["MiniAgentCore", "Agents"],
             path: "Sources/CLI"
         ),
-        
-        // Dashboard GUI
         .executableTarget(
             name: "Dashboard",
-            dependencies: [
-                "MiniAgentCore",
-                "Agents"
-            ],
+            dependencies: ["MiniAgentCore", "Agents"],
             path: "Sources/Dashboard"
         )
     ]

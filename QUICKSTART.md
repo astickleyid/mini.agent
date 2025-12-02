@@ -1,283 +1,178 @@
 # mini.agent Quick Start Guide
 
-Get up and running with mini.agent in 5 minutes!
-
----
+Get mini.agent up and running in 2 minutes with the simplified architecture!
 
 ## Prerequisites
 
 - macOS 13.0 or later
-- Xcode Command Line Tools
-- Swift 5.9+
-
-```bash
-# Install Xcode Command Line Tools if needed
-xcode-select --install
-```
-
----
+- Swift 5.9 or later (usually comes with Xcode or Command Line Tools)
 
 ## Installation
 
-### Step 1: Build and Install
+### 1. Clone and Install
 
 ```bash
-cd /path/to/mini.agent
+git clone <repository-url>
+cd mini.agent
 ./install.sh
 ```
 
-This will:
-- ✅ Create necessary directories in `~/.mini/`
-- ✅ Generate LaunchAgent configuration files
-- ✅ Build the CLI tool
-- ✅ Install `mini` to `/usr/local/bin/`
+That's it! The script will:
+- ✅ Create necessary directories
+- ✅ Build the CLI tool with SwiftPM
+- ✅ Install to `/usr/local/bin/mini`
 - ✅ Create default configuration
 
-### Step 2: Build the XPC Agents
-
-The agents need to be built separately:
+### 2. Initialize Your Project
 
 ```bash
-# Build all agents with Swift Package Manager
-swift build -c release
+# Initialize current directory
+mini init .
 
-# Or use Xcode for GUI development
-open mini-agent.xcodeproj
-# Then: Product → Build (⌘B)
+# Or specify a path
+mini init /path/to/your/swift/project
 ```
 
-### Step 3: Install Agents
-
-Run the install script again to deploy the built agents:
+### 3. Verify Installation
 
 ```bash
+mini --version
+mini config
+```
+
+## First Commands
+
+```bash
+# View git status
+mini status
+
+# Build your Swift project
+mini build
+
+# Run tests
+mini test
+
+# Create a commit
+mini commit "Initial commit"
+
+# Create a branch
+mini branch "feature/awesome"
+
+# Save a note
+mini memory "Remember: refactor the parser"
+```
+
+## How It Works
+
+The **simplified architecture** means:
+- 🚀 **Instant**: No service startup delays
+- 🎯 **Direct**: Agents run in-process using Swift actors
+- 🛠️ **Simple**: Standard SwiftPM build, no XPC/launchd
+- 🐛 **Easy**: Debug like any Swift app
+
+## Troubleshooting
+
+### Command Not Found
+
+```bash
+# Ensure installation completed
+which mini
+
+# If not found, check /usr/local/bin is in PATH
+echo $PATH
+
+# Reinstall if needed
 ./install.sh
 ```
 
-This will:
-- ✅ Copy agent binaries to `~/.mini/agents/`
-- ✅ Load LaunchAgents (agents will auto-start)
-
-### Step 4: Initialize Your Project
+### Build Errors
 
 ```bash
-# Initialize with your project path
-mini init /path/to/your/swift/project
+# Clean and rebuild
+swift package clean
+swift build -c release
+./install.sh
+```
 
-# Or use current directory
-cd /path/to/your/project
+## Configuration
+
+Configuration is stored at `~/.mini/config.json`:
+
+```json
+{
+  "projectPath": "/Users/you/.mini/projects/current",
+  "logsPath": "/Users/you/.mini/logs",
+  "memoryPath": "/Users/you/.mini/memory"
+}
+```
+
+View with: `mini config`
+
+## Common Workflows
+
+### Quick Development Loop
+
+```bash
+cd ~/my-swift-project
 mini init .
-```
-
----
-
-## Verification
-
-Check that everything is working:
-
-```bash
-# Check system status
-mini status
-
-# Should show all agents running
-# Example output:
-# 🔎 mini.agent System Status
-# --------------------------------
-# • Builder Agent: RUNNING
-# • Debugger Agent: RUNNING
-# • Memory Agent: RUNNING
-# ...
-```
-
----
-
-## Basic Usage
-
-### Build Your Project
-```bash
 mini build
-```
-
-### Run Tests
-```bash
 mini test
+mini commit "Fixed bug X"
 ```
 
-### Git Operations
-```bash
-# Create a commit
-mini commit "Your commit message"
-
-# Create a branch
-mini branch feature/new-feature
-```
-
-### Execute Shell Commands
-```bash
-mini shell "echo Hello from mini.agent"
-```
-
-### Save Notes
-```bash
-mini memory "Remember to refactor the Parser class"
-```
-
-### View Logs
-```bash
-# List all agent logs
-mini logs
-
-# View specific agent log
-mini logs builder
-mini logs test
-mini logs supervisor
-```
-
-### View Configuration
-```bash
-mini config
-```
-
-### Restart an Agent
-```bash
-mini restart builder
-```
-
----
-
-## Common Tasks
-
-### Check System Health
-```bash
-mini status
-```
-
-### Troubleshoot Issues
-```bash
-# View all available agent logs
-mini logs
-
-# Check supervisor logs
-mini logs supervisor
-
-# Restart a problematic agent
-mini restart <agent-name>
-
-# Check configuration
-mini config
-```
-
-### Change Project
-```bash
-# Switch to a different project
-mini init /path/to/another/project
-```
-
----
-
-## Directory Structure
-
-After installation, your `~/.mini/` directory will contain:
-
-```
-~/.mini/
-├── agents/           # Agent binaries
-│   ├── BuilderAgent/
-│   ├── DebuggerAgent/
-│   ├── MemoryAgent/
-│   ├── RepoAgent/
-│   ├── TestAgent/
-│   ├── TerminalProxyAgent/
-│   └── SupervisorAgent/
-├── logs/            # Agent logs
-│   ├── builder/
-│   ├── debugger/
-│   ├── memory/
-│   ├── repo/
-│   ├── test/
-│   ├── terminalproxy/
-│   └── supervisor/
-├── memory/          # Memory notes
-│   ├── summaries/
-│   └── history/
-├── projects/        # Project links
-│   └── current/     # Symlink to your project
-└── config.json      # Configuration file
-```
-
----
-
-## Available Commands
-
-```
-mini build                  # Build the current project
-mini test                   # Run tests
-mini commit "message"       # Create a git commit
-mini branch "name"          # Create a new git branch
-mini shell "command"        # Execute a shell command
-mini memory "note"          # Save a memory note
-mini status                 # Check system status
-mini logs [agent]           # View agent logs
-mini init [path]            # Initialize project
-mini config                 # Show configuration
-mini restart <agent>        # Restart an agent
-mini --version, -v          # Show version
-mini --help, -h             # Show this help
-```
-
----
-
-## Uninstall
-
-To remove mini.agent:
+### Using Memory
 
 ```bash
-# 1. Unload LaunchAgents
-launchctl unload ~/Library/LaunchAgents/mini.agent.*.plist
+# Save notes
+mini memory "TODO: Update documentation"
+mini memory "Bug: Parser fails on empty input"
 
-# 2. Remove LaunchAgent plists
-rm ~/Library/LaunchAgents/mini.agent.*.plist
-
-# 3. Remove CLI tool
-sudo rm /usr/local/bin/mini
-
-# 4. Remove data (optional - includes logs and memory)
-rm -rf ~/.mini
+# View saved notes (stored in ~/.mini/memory/)
+ls ~/.mini/memory/
 ```
 
----
+## What's Different?
 
-## Getting Help
+### Old Architecture (XPC-based)
+- ❌ Multiple processes via XPC services
+- ❌ LaunchAgent plist management
+- ❌ IPC serialization overhead
+- ❌ Complex debugging
 
-- **Documentation:** See [README.md](README.md) for detailed information
-- **Analysis:** See [ANALYSIS.md](ANALYSIS.md) for architecture details
-- **Implementation:** See [IMPLEMENTATION_SUMMARY.md](IMPLEMENTATION_SUMMARY.md) for recent changes
+### New Architecture (Simplified)
+- ✅ Single process with Swift actors
+- ✅ Standard SwiftPM build
+- ✅ Direct async/await calls
+- ✅ Easy debugging
 
-### Common Issues
+## Optional: SwiftUI Dashboard
 
-**"Failed to connect to agent"**
-- Run `mini status` to check if agents are running
-- Check logs: `mini logs supervisor`
-- Try restarting: `mini restart <agent-name>`
+Want a GUI? Open the Xcode project:
 
-**"Project not found"**
-- Run `mini init /path/to/project` to set up your project
-- Verify path: `mini config`
+```bash
+open mini-agent.xcodeproj
+# Build and run the "Dashboard" scheme
+```
 
-**"Timeout waiting for agent"**
-- The operation may take longer than 30 seconds
-- Check agent logs for issues: `mini logs <agent-name>`
-- Restart the agent: `mini restart <agent-name>`
-
----
+The dashboard provides:
+- Visual agent status
+- Quick action buttons
+- Real-time output display
+- Interactive command forms
 
 ## Next Steps
 
-1. **Try the Dashboard:** Open `MiniDashboard.app` for a GUI interface
-2. **Explore Features:** Try all commands to get familiar
-3. **Customize:** Edit `~/.mini/config.json` to customize paths
-4. **Integrate:** Add `mini` commands to your development workflow
+1. Try all commands: `mini --help`
+2. Read the [README](README.md) for architecture details
+3. Check out the agents in `Sources/Agents/`
+4. Customize agents for your workflow
 
----
+## Summary
 
-**Enjoy using mini.agent! 🚀**
+You now have:
+- ✅ CLI installed and working
+- ✅ Project initialized
+- ✅ Configuration ready
+- ✅ All agents available instantly
+
+**No services to manage. No complexity. Just works.** 🎉
