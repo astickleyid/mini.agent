@@ -6,3 +6,11 @@ xcuserdata/
 *.xcworkspace
 *.xcodeproj/project.xcworkspace/
 *.xcodeproj/xcuserdata/
+
+# Build artifacts
+.build/
+build/
+*.app/
+
+# macOS
+.DS_Store
