@@ -304,14 +304,78 @@ User Action → Agent Manager → Specific Agent → Output Panel
 
 ---
 
-## Current Limitations
+## Current Limitations & REALITY CHECK
 
-1. **Agents Not Fully Implemented**: Most agents are placeholder shells
-2. **No AI Integration Yet**: AI Tools config doesn't connect to actual APIs
-3. **No Project Management**: Projects tab is placeholder
-4. **No Code Generation**: Generate tab not built
-5. **No Knowledge Base**: Knowledge tab not built
-6. **No Persistence**: Configuration saves but not fully wired up
+### What Actually Works
+
+**Agents ARE Implemented:**
+- ✅ **BuilderAgent** - Runs `swift build` in configured project directory
+- ✅ **TestAgent** - Runs `swift test` (basic implementation)
+- ✅ **RepoAgent** - Full git operations (status, commit, branch, etc.)
+- ✅ **MemoryAgent** - Saves/lists markdown notes to `~/.mini/memory/`
+
+**BUT Here's the Problem:**
+
+1. **Wrong Project Path**: 
+   - Agents look for project at: `~/.mini/projects/current`
+   - Your actual project is at: `/Users/austinstickley/Downloads/mini.agent`
+   - **So "Build" button won't find anything to build!**
+
+2. **Memory Notes ARE Being Saved**:
+   - Location: `~/.mini/memory/*.md`
+   - You have: `2025-12-02_08-13-20.md`
+   - **They're just sitting in ~/.mini/ not visible in the UI**
+   - Need to either:
+     - Show them in Knowledge tab
+     - Add a "View Memory" button
+     - Integrate with AI for context
+
+3. **No Project Context**:
+   - System doesn't know WHAT Swift code to build
+   - System doesn't know WHAT tests to run
+   - System doesn't know WHICH repo to manage
+   - **You need to point it at a real project first**
+
+4. **No AI Integration Yet**: 
+   - AI Tools config UI exists but doesn't connect to actual APIs
+   - Copilot/Gemini/OpenAI/Ollama adapters not built
+   - Can't actually USE the AI tools yet
+
+5. **No Project Management**: Projects tab is placeholder
+6. **No Code Generation**: Generate tab not built  
+7. **No Knowledge UI**: Knowledge tab doesn't display the memory notes
+
+### How to Actually Use It Right Now
+
+**To make the Build/Test buttons work:**
+
+1. Create a symlink to your project:
+```bash
+mkdir -p ~/.mini/projects
+ln -s /Users/austinstickley/Downloads/mini.agent ~/.mini/projects/current
+```
+
+2. OR update the config to point to your project:
+```bash
+cat > ~/.mini/config.json << 'EOF'
+{
+  "projectPath": "/Users/austinstickley/Downloads/mini.agent",
+  "logsPath": "/Users/austinstickley/.mini/logs",
+  "memoryPath": "/Users/austinstickley/.mini/memory"
+}
+EOF
+```
+
+**To see your memory notes:**
+```bash
+ls -la ~/.mini/memory/
+cat ~/.mini/memory/*.md
+```
+
+**Git operations work IF:**
+- You're running the dashboard from a git repository
+- The configured projectPath points to a git repo
+- Otherwise you get "Git error"
 
 ---
 
